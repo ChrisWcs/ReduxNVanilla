@@ -4,12 +4,20 @@ const addBtn = document.getElementById('btn');
 const listCon = document.getElementById('listCon');
 listCon.appendChild(document.createElement('ul'));
 
-const updateList = (listCon, arr) => {
+// Function that abstracts away the DOM
+
+const updateList = (listCon, arr, store, func) => {
     listCon.removeChild(listCon.firstChild);
     let ul = document.createElement('ul');
-    let lis = arr.map( x => { 
+    let lis = arr.map( (x, i) => { 
         let li = document.createElement('li');
+        let btn = document.createElement('button');
+        btn.innerText = "X";
+        btn.onclick = () => {
+            store.dispatch(func(i));
+        };
         li.innerText = x;
+        li.appendChild(btn);
         return li;
     });
     lis.forEach( x => {
@@ -18,17 +26,22 @@ const updateList = (listCon, arr) => {
     listCon.appendChild(ul);
 };
 
-
 // ACTIONS
 
 const ADD_TODO = "ADD_TODO";
+const REMOVE_TODO = "REMOVE_TODO";
 
 // Action creators
 
 const createAddTodo = (text) => ({
     type: ADD_TODO,
     todo: text
-})
+});
+
+const createRemoveTodo = (index) => ({
+    type: REMOVE_TODO,
+    index: index,
+});
 
 // Initial State
 
@@ -45,6 +58,10 @@ const reducer = (state = initialState(), action) => {
                 todos: [ ...state.todos, action.todo]
             };
 
+        case REMOVE_TODO:
+            return {
+                todos: [ ...state.todos.slice(0, action.index), ...state.todos.slice(action.index + 1, state.todos.length)]
+            };
         default:
             return state;
     }
@@ -55,7 +72,7 @@ const reducer = (state = initialState(), action) => {
 const store = Redux.createStore(reducer);
 
 store.subscribe( () => {
-    updateList(listCon, store.getState().todos);
+    updateList(listCon, store.getState().todos, store, createRemoveTodo);
 });
 
 addBtn.onclick = () => {
