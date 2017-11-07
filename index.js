@@ -1,9 +1,23 @@
-console.log(Redux);
-
-// Grab necessary ui from the DOM
+// DOM
 const inputField = document.getElementById('in');
 const addBtn = document.getElementById('btn');
 const listCon = document.getElementById('listCon');
+listCon.appendChild(document.createElement('ul'));
+
+const updateList = (listCon, arr) => {
+    listCon.removeChild(listCon.firstChild);
+    let ul = document.createElement('ul');
+    let lis = arr.map( x => { 
+        let li = document.createElement('li');
+        li.innerText = x;
+        return li;
+    });
+    lis.forEach( x => {
+        ul.appendChild(x);
+    });
+    listCon.appendChild(ul);
+};
+
 
 // ACTIONS
 
@@ -24,7 +38,7 @@ const initialState = () => ({
 
 // Reducer
 
-const reducer = (state = initialState, action) => {
+const reducer = (state = initialState(), action) => {
     switch(action.type){
         case ADD_TODO:
             return {
@@ -40,7 +54,13 @@ const reducer = (state = initialState, action) => {
 
 const store = Redux.createStore(reducer);
 
+store.subscribe( () => {
+    updateList(listCon, store.getState().todos);
+});
+
 addBtn.onclick = () => {
     store.dispatch(createAddTodo(inputField.value));
 }
+
+
 
